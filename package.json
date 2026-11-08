@@ -1,0 +1,19 @@
+{
+  "name": "opencode-db-minimize",
+  "version": "1.0.1",
+  "description": "A zero-dependency tool to safely analyze and minimize OpenCode SQLite databases.",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "ocdbm": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["cli", "sqlite", "opencode", "minimize", "ocdbm"],
+  "author": "Your Name",
+  "license": "ISC",
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}
