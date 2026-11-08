@@ -143,21 +143,40 @@ function analyzeDatabase() {
             console.log(` - 0 rows: ${emptyTables.join(', ')}`);
         }
 
-        const hasMessages = tables.some(t => t.name === 'messages');
-        if (hasMessages) {
+        const messagesTable = tables.find(t => t.name === 'messages' || t.name === 'message')?.name;
+        if (messagesTable) {
             console.log(`\n✉️  Biggest Messages Top 3:`);
             try {
-                const columns = db.prepare("PRAGMA table_info(messages)").all().map(c => c.name);
-                const textCol = columns.includes('content') ? 'content' : (columns.includes('text') ? 'text' : null);
+                const columns = db.prepare(`PRAGMA table_info(${messagesTable})`).all().map(c => c.name);
+                const textCol = columns.includes('content') ? 'content' :
+                                (columns.includes('text') ? 'text' :
+                                (columns.includes('data') ? 'data' : null));
 
-                if (textCol) {
-                    const topMessages = db.prepare(`SELECT id, length(${textCol}) as len FROM messages ORDER BY len DESC LIMIT 3`).all();
-                    topMessages.forEach((msg, idx) => {
-                        console.log(` ${idx + 1}. ID: ${msg.id} | Size: ${formatBytes(msg.len)}`);
-                    });
+                if (!textCol) {
+                    console.log(` (No 'content', 'text', or 'data' column found; available columns: ${columns.join(', ')})`);
+                } else {
+                    const idCol = columns.includes('id') ? 'id' : (columns.includes('rowid') ? 'rowid' : 'rowid');
+                    const totalRows = db.prepare(`SELECT COUNT(*) as count FROM ${messagesTable}`).get().count;
+
+                    let lenExpr;
+                    if (textCol === 'data') {
+                        // If data is JSON, extract common text fields; otherwise measure the raw value.
+                        lenExpr = `IIF(json_valid(${textCol}), length(COALESCE(json_extract(${textCol}, '$.content'), json_extract(${textCol}, '$.text'), json_extract(${textCol}, '$.body'), ${textCol})), length(COALESCE(${textCol}, '')))`;
+                    } else {
+                        lenExpr = `length(COALESCE(${textCol}, ''))`;
+                    }
+
+                    const topMessages = db.prepare(`SELECT ${idCol} as id, ${lenExpr} as len FROM ${messagesTable} ORDER BY len DESC LIMIT 3`).all();
+                    if (topMessages.length === 0) {
+                        console.log(` (Table has ${totalRows} rows, but no message content found)`);
+                    } else {
+                        topMessages.forEach((msg, idx) => {
+                            console.log(` ${idx + 1}. ID: ${msg.id} | Size: ${formatBytes(msg.len)}`);
+                        });
+                    }
                 }
             } catch (e) {
-                console.log(` (Could not analyze message sizes due to schema differences)`);
+                console.log(` (Could not analyze message sizes: ${e.message})`);
             }
         }
 
