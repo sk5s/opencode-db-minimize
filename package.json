@@ -1,6 +1,6 @@
 {
   "name": "@sk5s/opencode-db-minimize",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A zero-dependency tool to safely analyze and minimize OpenCode SQLite databases.",
   "main": "index.js",
   "type": "module",
@@ -11,6 +11,19 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["cli", "sqlite", "opencode", "minimize", "ocdbm"],
+  "homepage": "https://sk5s.com/opencode-db-minimize/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sk5s/opencode-db-minimize.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sk5s/opencode-db-minimize/issues"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
   "author": "sk5s",
   "license": "MIT",
   "engines": {
